@@ -1,0 +1,30 @@
+
+
+services:
+  rabbitmq:
+    cpus: 7.0
+    image: rabbitmq:3.10.6-alpine
+    volumes:
+      - ./rabbitmq-data:/var/lib/rabbitmq
+    ports:
+      - 15671:15671
+      - 15672:15672
+    environment:
+      TZ: "Europe/Berlin"
+      NODENAME: rabbit@rabbitmq
+      RABBITMQ_DEFAULT_USER: rmq-user
+      RABBITMQ_DEFAULT_PASS: rmq-pass
+      RABBITMQ_DEFAULT_VHOST: rmq-vhost
+    restart: always
+    healthcheck:
+      test: "rabbitmq-diagnostics -q ping"
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 300s
+  rmq-test-py:
+    image: rmq-test-py:latest
+    restart: always
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
